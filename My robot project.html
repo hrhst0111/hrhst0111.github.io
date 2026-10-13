@@ -1,0 +1,366 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>My robot project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single engineering drawing sheet — blueprint grid ground, title block hero with a live arm schematic, spec-sheet cards, dated dev log. */
+:root{
+  --paper:#0c1d33;      /* blueprint ground */
+  --paper-2:#11263f;    /* raised sheet */
+  --line:#7cc4f2;       /* drafting ink */
+  --line-dim:rgba(124,196,242,.16);
+  --grid:rgba(124,196,242,.07);
+  --ink:#e4f0fa;        /* text */
+  --ink-dim:#93acc4;
+  --amber:#f2b84b;      /* callouts / in progress */
+  --ok:#6fd3a6;
+  --hold:#b49ae8;
+  --f-display:"Chakra Petch","IBM Plex Sans KR",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px),
+    linear-gradient(var(--line-dim) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line-dim) 1px,transparent 1px);
+  background-size:16px 16px,16px 16px,128px 128px,128px 128px;
+  color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;
+  padding-inline:clamp(16px,4vw,48px);padding-block:0 48px;
+}
+.wrap{max-width:1180px;margin-inline:auto}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  padding-block:14px;background:linear-gradient(var(--paper) 70%,transparent);}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:700;letter-spacing:.04em;text-decoration:none}
+.brand svg{width:28px;height:28px}
+.nav ul{display:flex;gap:4px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.nav ul a{display:block;padding:6px 12px;font-size:13px;text-decoration:none;color:var(--ink-dim);border:1px solid transparent}
+.nav ul a:hover{color:var(--ink);border-color:var(--line-dim)}
+
+/* hero = title block */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(24px,4vw,56px);align-items:center;padding-block:clamp(32px,6vw,72px) 40px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--line)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(44px,7.4vw,92px);line-height:.95;letter-spacing:-.01em;margin:14px 0 20px;text-wrap:balance}
+h1 span{display:block;color:transparent;-webkit-text-stroke:1.5px var(--line)}
+.lede{max-width:34em;color:var(--ink-dim);font-size:16px;margin:0 0 28px}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:12px 20px;text-decoration:none;border:1px solid var(--line);transition:background .2s,color .2s}
+.btn.primary{background:var(--line);color:var(--paper)}
+.btn:hover{background:var(--amber);border-color:var(--amber);color:var(--paper)}
+
+.sheet{position:relative;border:1px solid var(--line);background:rgba(12,29,51,.6);min-width:0}
+.sheet canvas{display:block;width:100%;aspect-ratio:4/3;max-width:100%}
+.titleblock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);font-family:var(--f-mono);font-size:11px}
+.titleblock div{padding:8px 10px;border-right:1px solid var(--line-dim);min-width:0}
+.titleblock div:last-child{border-right:0}
+.titleblock b{display:block;color:var(--ink-dim);font-weight:400;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.titleblock output{color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line-dim);margin-block:8px 72px}
+.stat{padding:20px 22px;border-right:1px solid var(--line-dim)}
+.stat:last-child{border-right:0}
+.stat .n{font-family:var(--f-display);font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .n small{font-size:14px;color:var(--ink-dim);margin-left:4px}
+.stat .k{font-size:13px;color:var(--ink-dim)}
+
+/* sections */
+section{margin-bottom:88px;scroll-margin-top:80px}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:24px}
+h2{font-family:var(--f-display);font-size:clamp(26px,3.4vw,36px);font-weight:600;margin:4px 0 0;line-height:1.15}
+.note{font-family:var(--f-mono);font-size:11px;color:var(--amber);border:1px dashed var(--amber);padding:2px 8px}
+
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{font:500 13px var(--f-body);color:var(--ink-dim);background:transparent;border:1px solid var(--line-dim);padding:6px 14px;cursor:pointer}
+.filters button[aria-pressed="true"]{color:var(--paper);background:var(--line);border-color:var(--line)}
+.filters button:hover:not([aria-pressed="true"]){color:var(--ink);border-color:var(--line)}
+
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.card{background:var(--paper-2);border:1px solid var(--line-dim);display:flex;flex-direction:column;min-width:0;transition:border-color .2s,transform .2s}
+.card:hover{border-color:var(--line);transform:translateY(-3px)}
+.card .fig{border-bottom:1px solid var(--line-dim);aspect-ratio:16/9;max-width:100%;position:relative}
+.card .fig svg{width:100%;height:100%;display:block}
+.card .fig .dwg{position:absolute;left:10px;top:8px;font-family:var(--f-mono);font-size:11px;color:var(--ink-dim)}
+.card .body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px;flex:1}
+.card h3{font-family:var(--f-display);font-size:21px;font-weight:600;margin:0;line-height:1.2}
+.card p{margin:0;color:var(--ink-dim);font-size:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;padding:2px 8px;border:1px solid currentColor;width:max-content}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.active{color:var(--amber)} .pill.done{color:var(--ok)} .pill.hold{color:var(--hold)}
+.pill.active::before{animation:blink 1.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+dl.spec{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;margin:auto 0 0;font-size:13px;border-top:1px dashed var(--line-dim);padding-top:12px}
+dl.spec dt{font-family:var(--f-mono);font-size:11px;color:var(--ink-dim);letter-spacing:.06em;padding-top:2px}
+dl.spec dd{margin:0;font-variant-numeric:tabular-nums}
+
+/* log */
+.log{list-style:none;margin:0;padding:0;border-left:1px solid var(--line);margin-left:6px}
+.log li{position:relative;display:grid;grid-template-columns:130px minmax(0,1fr);gap:20px;padding:0 0 28px 28px}
+.log li::before{content:"";position:absolute;left:-6px;top:6px;width:11px;height:11px;border:1px solid var(--line);background:var(--paper);transform:rotate(45deg)}
+.log li.hl::before{background:var(--amber);border-color:var(--amber)}
+.log time{font-family:var(--f-mono);font-size:13px;color:var(--line);font-variant-numeric:tabular-nums;padding-top:2px}
+.log h4{margin:0 0 4px;font-size:16px;font-weight:600}
+.log p{margin:0;color:var(--ink-dim);font-size:14px;max-width:60ch}
+.log .tag{font-family:var(--f-mono);font-size:11px;color:var(--ink-dim);margin-left:8px;font-weight:400}
+
+/* parts */
+.parts-wrap{overflow-x:auto;border:1px solid var(--line-dim)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line-dim)}
+th{font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);background:var(--paper-2)}
+td.num{font-variant-numeric:tabular-nums;text-align:right;font-family:var(--f-mono)}
+th.num{text-align:right}
+tr:last-child td{border-bottom:0}
+
+footer{border-top:1px solid var(--line);padding-top:20px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--f-mono);font-size:12px;color:var(--ink-dim)}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat:nth-child(2){border-right:0}
+  .stat:nth-child(-n+2){border-bottom:1px solid var(--line-dim)}
+}
+@media (max-width:600px){
+  .grid{grid-template-columns:1fr}
+  .nav ul{display:none}
+  .log li{grid-template-columns:1fr;gap:4px}
+  .titleblock{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .titleblock div:nth-child(2){border-right:0}
+  .titleblock div:nth-child(-n+2){border-bottom:1px solid var(--line-dim)}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+
+<div class="wrap">
+  <nav class="nav" aria-label="주 메뉴">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 28 28" fill="none" stroke="#7cc4f2" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="24" height="24"/><circle cx="9" cy="19" r="3"/><circle cx="17" cy="10" r="2.4"/><path d="M11 17 L15.5 11.5 M19 9 L23 6"/></svg>
+      My robot project
+    </a>
+    <ul>
+      <li><a href="#projects">프로젝트</a></li>
+      <li><a href="#log">개발 로그</a></li>
+      <li><a href="#parts">부품 목록</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero" id="top">
+    <div>
+      <div class="eyebrow">Robot Development Archive · Since 2023</div>
+      <h1>My robot<span>project</span></h1>
+      <p class="lede">직접 설계하고, 깎고, 납땜하고, 다시 고친 로봇들의 기록입니다. 프로젝트마다 사양, 사용한 부품, 실패와 수정 과정을 도면처럼 정리해 둡니다.</p>
+      <div class="btns">
+        <a class="btn primary" href="#projects">프로젝트 보기</a>
+        <a class="btn" href="#log">개발 로그</a>
+      </div>
+    </div>
+    <figure class="sheet" style="margin:0">
+      <canvas id="arm" width="800" height="600" role="img" aria-label="3축 로봇 팔이 천천히 움직이는 도면 애니메이션"></canvas>
+      <div class="titleblock">
+        <div><b>DWG</b><output>RP-003-A</output></div>
+        <div><b>J1</b><output id="j1">0.0°</output></div>
+        <div><b>J2</b><output id="j2">0.0°</output></div>
+        <div><b>J3</b><output id="j3">0.0°</output></div>
+      </div>
+    </figure>
+  </header>
+
+  <div class="stats" aria-label="아카이브 요약 (예시 수치)">
+    <div class="stat"><div class="n">6<small>건</small></div><div class="k">기록된 프로젝트</div></div>
+    <div class="stat"><div class="n">2<small>건</small></div><div class="k">진행 중</div></div>
+    <div class="stat"><div class="n">1,240<small>h</small></div><div class="k">누적 작업 시간</div></div>
+    <div class="stat"><div class="n">31<small>DOF</small></div><div class="k">만든 관절 수 합계</div></div>
+  </div>
+
+  <section id="projects">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">Index of drawings</div>
+        <h2>프로젝트 아카이브</h2>
+      </div>
+      <div class="filters" role="group" aria-label="상태로 거르기">
+        <button type="button" id="f-all" data-f="all" aria-pressed="true">전체</button>
+        <button type="button" id="f-active" data-f="active" aria-pressed="false">진행 중</button>
+        <button type="button" id="f-done" data-f="done" aria-pressed="false">완료</button>
+        <button type="button" id="f-hold" data-f="hold" aria-pressed="false">보류</button>
+      </div>
+    </div>
+    <p style="margin:-8px 0 20px"><span class="note">예시 항목 · 실제 프로젝트 정보로 바꿔 주세요</span></p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="log">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">Revision history</div>
+        <h2>개발 로그</h2>
+      </div>
+      <span class="note">예시</span>
+    </div>
+    <ol class="log">
+      <li class="hl"><time datetime="2026-09-28">2026.09.28</time><div><h4>RP-006 보행 시뮬레이션 첫 성공<span class="tag">REV C</span></h4><p>Gazebo에서 4족 트롯 보행이 30초 이상 넘어지지 않고 유지됨. 다음 단계는 실제 기체에 게인 이식.</p></div></li>
+      <li><time datetime="2026-08-14">2026.08.14</time><div><h4>RP-005 라이다 SLAM 맵 정합 개선<span class="tag">REV B</span></h4><p>오도메트리 드리프트 때문에 맵이 휘던 문제를 IMU 융합으로 해결. 거실 한 바퀴 오차 4cm 이내.</p></div></li>
+      <li><time datetime="2026-05-02">2026.05.02</time><div><h4>RP-003 그리퍼 재설계<span class="tag">REV A</span></h4><p>PLA 그리퍼가 0.5kg에서 부러짐. PETG + 인필 60%로 다시 출력하고 손가락 끝에 TPU 패드 추가.</p></div></li>
+      <li><time datetime="2025-11-20">2025.11.20</time><div><h4>RP-004 보류 결정</h4><p>BLDC 드라이버 발열 문제로 중단. 방열판 구조를 다시 설계할 때까지 보류.</p></div></li>
+      <li><time datetime="2023-03-11">2023.03.11</time><div><h4>RP-001 라인트레이서 완성</h4><p>첫 로봇. 적외선 센서 5개와 PID 제어로 트랙 완주 랩타임 11.8초.</p></div></li>
+    </ol>
+  </section>
+
+  <section id="parts">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">Bill of materials</div>
+        <h2>자주 쓰는 부품</h2>
+      </div>
+      <span class="note">예시</span>
+    </div>
+    <div class="parts-wrap">
+      <table>
+        <thead><tr><th>부품</th><th>규격</th><th>사용 프로젝트</th><th class="num">수량</th></tr></thead>
+        <tbody>
+          <tr><td>서보 모터 MG996R</td><td>토크 11 kg·cm @6V</td><td>RP-002, RP-003</td><td class="num">14</td></tr>
+          <tr><td>Dynamixel XL430</td><td>1.5 N·m, TTL</td><td>RP-006</td><td class="num">12</td></tr>
+          <tr><td>Raspberry Pi 5</td><td>8GB, ROS 2 Jazzy</td><td>RP-005, RP-006</td><td class="num">2</td></tr>
+          <tr><td>ESP32-S3</td><td>Wi-Fi/BLE MCU</td><td>RP-002, RP-004</td><td class="num">3</td></tr>
+          <tr><td>RPLIDAR A1</td><td>360°, 12m</td><td>RP-005</td><td class="num">1</td></tr>
+          <tr><td>LiPo 배터리</td><td>3S 11.1V 2200mAh</td><td>RP-004, RP-005, RP-006</td><td class="num">4</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span>My robot project · 개인 로봇 개발 아카이브</span>
+    <span>SHEET 1 / 1 · SCALE 1:1</span>
+  </footer>
+</div>
+
+<script>
+/* ---------- projects ---------- */
+const projects=[
+  {id:"RP-006",name:"사족 보행 로봇 Quad-α",status:"active",type:"quad",desc:"12자유도 사족 보행 로봇. 시뮬레이션에서 학습한 보행을 실제 기체로 옮기는 중.",spec:{"DOF":"12","제어":"Raspberry Pi 5 · ROS 2","구동":"Dynamixel XL430","기간":"2026.03 – 진행 중"}},
+  {id:"RP-005",name:"실내 자율주행 로버",status:"active",type:"rover",desc:"라이다 SLAM으로 집 안 지도를 만들고 지정한 방까지 스스로 이동.",spec:{"DOF":"2 (차동구동)","제어":"Raspberry Pi 5 · Nav2","센서":"RPLIDAR A1, IMU","기간":"2026.01 – 진행 중"}},
+  {id:"RP-003",name:"3축 탁상 로봇 팔",status:"done",type:"arm",desc:"역기구학으로 펜 끝 좌표를 지정해 그림을 그리는 탁상용 팔.",spec:{"DOF":"3 + 그리퍼","제어":"Arduino Mega","구동":"MG996R × 4","기간":"2025.06 – 2026.05"}},
+  {id:"RP-004",name:"밸런싱 로봇",status:"hold",type:"balance",desc:"BLDC 모터로 균형을 잡는 이륜 도립진자. 드라이버 발열로 보류.",spec:{"DOF":"2","제어":"ESP32-S3","구동":"BLDC 2208","기간":"2025.08 – 보류"}},
+  {id:"RP-002",name:"헥사포드 Mk.1",status:"done",type:"hex",desc:"6다리 18서보 보행 로봇. 스마트폰 BLE로 조종.",spec:{"DOF":"18","제어":"ESP32-S3","구동":"MG996R × 18","기간":"2024.02 – 2024.10"}},
+  {id:"RP-001",name:"PID 라인트레이서",status:"done",type:"line",desc:"첫 번째 로봇. 적외선 센서 배열과 PID로 트랙을 따라 달림.",spec:{"DOF":"2","제어":"Arduino Nano","센서":"IR × 5","기간":"2023.01 – 2023.03"}}
+];
+const label={active:"진행 중",done:"완료",hold:"보류"};
+const S='stroke="#7cc4f2" stroke-width="1.4" fill="none"';
+const D='stroke="rgba(124,196,242,.4)" stroke-width="1" fill="none" stroke-dasharray="4 4"';
+const figs={
+  arm:`<line x1="40" y1="150" x2="280" y2="150" ${D}/><rect x="120" y="128" width="50" height="22" ${S}/><circle cx="145" cy="120" r="9" ${S}/><path d="M145 120 L190 70" ${S}/><circle cx="190" cy="70" r="7" ${S}/><path d="M190 70 L240 88" ${S}/><path d="M240 88 l14 -8 M240 88 l14 8" ${S}/><path d="M160 120 A15 15 0 0 0 155 108" ${D}/>`,
+  quad:`<line x1="30" y1="150" x2="290" y2="150" ${D}/><rect x="95" y="70" width="130" height="34" ${S}/><path d="M110 104 L95 128 L110 150 M140 104 L130 128 L142 150 M180 104 L190 128 L178 150 M210 104 L226 128 L212 150" ${S}/><circle cx="95" cy="128" r="4" ${S}/><circle cx="226" cy="128" r="4" ${S}/>`,
+  rover:`<line x1="30" y1="150" x2="290" y2="150" ${D}/><rect x="100" y="90" width="120" height="40" ${S}/><circle cx="125" cy="135" r="15" ${S}/><circle cx="195" cy="135" r="15" ${S}/><rect x="145" y="70" width="30" height="20" ${S}/><circle cx="160" cy="80" r="40" ${D}/><circle cx="160" cy="80" r="62" ${D}/>`,
+  balance:`<line x1="30" y1="150" x2="290" y2="150" ${D}/><circle cx="160" cy="130" r="20" ${S}/><rect x="146" y="40" width="28" height="84" ${S} transform="rotate(6 160 130)"/><line x1="160" y1="20" x2="160" y2="150" ${D}/>`,
+  hex:`<line x1="30" y1="150" x2="290" y2="150" ${D}/><path d="M120 80 L200 80 L220 100 L200 120 L120 120 L100 100 Z" ${S}/><path d="M120 120 L95 135 L90 150 M160 120 L160 136 L156 150 M200 120 L225 135 L230 150 M120 80 L95 60 M200 80 L225 60 M100 100 L70 100" ${S}/>`,
+  line:`<path d="M30 140 C90 140 100 60 160 60 S240 140 290 140" stroke="rgba(242,184,75,.6)" stroke-width="6" fill="none"/><rect x="125" y="50" width="70" height="40" ${S}/><circle cx="135" cy="95" r="8" ${S}/><circle cx="185" cy="95" r="8" ${S}/>`
+};
+const grid=document.getElementById('grid');
+grid.innerHTML=projects.map(p=>`
+<article class="card" data-status="${p.status}">
+  <div class="fig"><span class="dwg">DWG ${p.id}</span><svg viewBox="0 0 320 170" aria-hidden="true">${figs[p.type]}</svg></div>
+  <div class="body">
+    <span class="pill ${p.status}">${label[p.status]}</span>
+    <h3>${p.name}</h3>
+    <p>${p.desc}</p>
+    <dl class="spec">${Object.entries(p.spec).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+  </div>
+</article>`).join('');
+document.querySelectorAll('.filters button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.filters button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  const f=b.dataset.f;
+  grid.querySelectorAll('.card').forEach(c=>{c.hidden=!(f==='all'||c.dataset.status===f)});
+}));
+
+/* ---------- arm schematic ---------- */
+const cv=document.getElementById('arm'),ctx=cv.getContext('2d');
+const o={j1:document.getElementById('j1'),j2:document.getElementById('j2'),j3:document.getElementById('j3')};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const INK='#7cc4f2',DIM='rgba(124,196,242,.35)',AMB='#f2b84b',TXT='#93acc4';
+const L=[170,140,70],base={x:300,y:500};
+function dimLine(a,b,off,txt){
+  const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),nx=-dy/len*off,ny=dx/len*off;
+  ctx.strokeStyle=DIM;ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(a.x+nx,a.y+ny);ctx.lineTo(b.x+nx,b.y+ny);ctx.stroke();
+  [a,b].forEach(p=>{ctx.beginPath();ctx.moveTo(p.x+nx*.4,p.y+ny*.4);ctx.lineTo(p.x+nx*1.2,p.y+ny*1.2);ctx.stroke();});
+  ctx.save();ctx.translate((a.x+b.x)/2+nx*1.5,(a.y+b.y)/2+ny*1.5);
+  let ang=Math.atan2(dy,dx);if(ang>Math.PI/2||ang<-Math.PI/2)ang+=Math.PI;
+  ctx.rotate(ang);ctx.fillStyle=TXT;ctx.font='15px "IBM Plex Mono", monospace';ctx.textAlign='center';ctx.fillText(txt,0,4);ctx.restore();
+}
+function joint(p,r){
+  ctx.strokeStyle=INK;ctx.lineWidth=1.6;ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle=DIM;ctx.beginPath();ctx.moveTo(p.x-r-8,p.y);ctx.lineTo(p.x+r+8,p.y);ctx.moveTo(p.x,p.y-r-8);ctx.lineTo(p.x,p.y+r+8);ctx.stroke();
+}
+function link(a,b,w){
+  const ang=Math.atan2(b.y-a.y,b.x-a.x),len=Math.hypot(b.x-a.x,b.y-a.y);
+  ctx.save();ctx.translate(a.x,a.y);ctx.rotate(ang);
+  ctx.strokeStyle=INK;ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.moveTo(0,-w);ctx.lineTo(len,-w);ctx.arc(len,0,w,-Math.PI/2,Math.PI/2);ctx.lineTo(0,w);ctx.arc(0,0,w,Math.PI/2,Math.PI*1.5);ctx.stroke();
+  ctx.setLineDash([6,4,1,4]);ctx.strokeStyle=DIM;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-w,0);ctx.lineTo(len+w,0);ctx.stroke();ctx.setLineDash([]);
+  ctx.restore();
+}
+function arcLabel(p,from,to,r,txt){
+  ctx.strokeStyle=AMB;ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(p.x,p.y,r,Math.min(from,to),Math.max(from,to));ctx.stroke();
+  const m=(from+to)/2;ctx.fillStyle=AMB;ctx.font='14px "IBM Plex Mono", monospace';ctx.textAlign='center';
+  ctx.fillText(txt,p.x+Math.cos(m)*(r+24),p.y+Math.sin(m)*(r+24)+4);
+}
+const trail=[];
+function draw(t){
+  const s=t/1000;
+  const a1=-Math.PI/2+0.55*Math.sin(s*0.45);
+  const a2=0.9+0.45*Math.sin(s*0.6+1);
+  const a3=-0.7+0.6*Math.sin(s*0.8+2);
+  const p0=base,
+    p1={x:p0.x+L[0]*Math.cos(a1),y:p0.y+L[0]*Math.sin(a1)},
+    p2={x:p1.x+L[1]*Math.cos(a1+a2),y:p1.y+L[1]*Math.sin(a1+a2)},
+    p3={x:p2.x+L[2]*Math.cos(a1+a2+a3),y:p2.y+L[2]*Math.sin(a1+a2+a3)};
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // ground + base
+  ctx.strokeStyle=DIM;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(40,540);ctx.lineTo(760,540);ctx.stroke();
+  for(let x=50;x<760;x+=18){ctx.beginPath();ctx.moveTo(x,540);ctx.lineTo(x-10,552);ctx.stroke();}
+  ctx.strokeStyle=INK;ctx.lineWidth=1.6;ctx.strokeRect(base.x-50,base.y+10,100,30);
+  // trail of tool tip
+  trail.push({x:p3.x,y:p3.y});if(trail.length>140)trail.shift();
+  ctx.strokeStyle='rgba(242,184,75,.45)';ctx.setLineDash([2,5]);ctx.beginPath();
+  trail.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.setLineDash([]);
+  link(p0,p1,16);link(p1,p2,13);link(p2,p3,9);
+  joint(p0,20);joint(p1,15);joint(p2,11);
+  // gripper
+  const ga=a1+a2+a3;ctx.strokeStyle=INK;ctx.lineWidth=1.6;
+  [-1,1].forEach(sg=>{ctx.beginPath();ctx.moveTo(p3.x,p3.y);ctx.lineTo(p3.x+Math.cos(ga+sg*.5)*28,p3.y+Math.sin(ga+sg*.5)*28);ctx.lineTo(p3.x+Math.cos(ga+sg*.2)*44,p3.y+Math.sin(ga+sg*.2)*44);ctx.stroke();});
+  // dims + angles
+  dimLine(p0,p1,-38,'L1 170');dimLine(p1,p2,-34,'L2 140');
+  arcLabel(p0,-Math.PI,a1,46,`θ1`);
+  arcLabel(p1,a1,a1+a2,34,`θ2`);
+  // tip coords
+  const X=(p3.x-base.x).toFixed(0),Y=(base.y-p3.y).toFixed(0);
+  ctx.fillStyle=AMB;ctx.beginPath();ctx.arc(p3.x,p3.y,3.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=TXT;ctx.font='14px "IBM Plex Mono", monospace';ctx.textAlign='left';
+  ctx.fillText(`TCP (${X}, ${Y}) mm`,Math.min(p3.x+16,600),Math.max(p3.y-16,24));
+  ctx.fillStyle=TXT;ctx.font='13px "IBM Plex Mono", monospace';
+  ctx.fillText('SIDE VIEW · 3-DOF ARM · UNIT mm',40,40);
+  const deg=r=>(r*180/Math.PI).toFixed(1)+'°';
+  o.j1.textContent=deg(-a1);o.j2.textContent=deg(a2);o.j3.textContent=deg(a3);
+  if(!reduce)requestAnimationFrame(draw);
+}
+const start=()=>requestAnimationFrame(draw);
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(start,start);
+</script>
+
+</body></html>
